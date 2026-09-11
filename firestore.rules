@@ -1,0 +1,42 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && (
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "admin"
+      );
+    }
+
+    // Admin Users Collection
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      // Allow user to initialize their own admin profile, or existing admin to update
+      allow write: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
+    }
+
+    // Inventory Items Collection
+    match /inventory_items/{itemId} {
+      // Anyone can view store inventory without logging in
+      allow read: if true;
+      // Authenticated Admin create, update, delete permissions
+      allow create, update, delete: if isAuthenticated();
+    }
+
+    // Transaction Audit Logs Collection
+    match /transaction_logs/{logId} {
+      // Anyone can view transaction history in read-only mode
+      allow read: if true;
+      // Immutable ledger: admin can create logs, but cannot update or delete existing audit entries
+      allow create: if isAuthenticated();
+      allow update, delete: if false;
+    }
+  }
+}

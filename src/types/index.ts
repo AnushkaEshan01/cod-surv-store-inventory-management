@@ -55,7 +55,7 @@ export interface CameraRelocation {
   cameraModel?: string; // e.g. "Hikvision 4MP IP Dome"
   inventoryItemId?: string; // optional linked inventory item
   relocationDate: string; // ISO or YYYY-MM-DD
-  technicianName: string; // e.g. "Kasun Perera"
+  technicianName?: string; // optional technician
   status: RelocationStatus;
   isQuotaProject?: boolean; // true = Part of COD 100 Annual Quota; false = Non-Quota / Other
   notes?: string;

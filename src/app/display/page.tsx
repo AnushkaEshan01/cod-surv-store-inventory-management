@@ -339,8 +339,8 @@ export default function DisplayWallboardPage() {
             <div>
               <div className="flex items-center justify-between mb-3">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold">
-                  <Building2 className="w-3.5 h-3.5" />
-                  <span>COD Third-Party Contractor Project</span>
+                  <Camera className="w-3.5 h-3.5" />
+                  <span>COD Camera Relocation Project</span>
                 </div>
                 <span className="text-xs font-bold text-zinc-400">
                   Annual 100 Camera Contract
@@ -413,44 +413,31 @@ export default function DisplayWallboardPage() {
               </div>
             </div>
 
-            {/* Contract & Relocation Overview Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-4 border-t border-zinc-800/60">
-              <div className="p-3.5 rounded-2xl bg-zinc-950/60 border border-zinc-800/50">
+            {/* Relocation Overview Cards: COD 100 Quota & Non-Quota */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-4 border-t border-zinc-800/60">
+              <div className="p-4 rounded-2xl bg-zinc-950/60 border border-zinc-800/50">
                 <div className="flex items-center gap-1.5 text-xs text-blue-400 mb-1">
-                  <Building2 className="w-3.5 h-3.5" />
-                  <span>COD 100 Quota</span>
+                  <Building2 className="w-4 h-4" />
+                  <span className="font-semibold">COD 100 Quota</span>
                 </div>
-                <div className="text-xl font-black text-white">
+                <div className="text-2xl font-black text-white">
                   {stats.totalRelocated} <span className="text-xs font-normal text-zinc-500">/ {annualTarget}</span>
                 </div>
-                <div className="text-[10px] text-emerald-400 font-semibold mt-0.5">
+                <div className="text-[11px] text-emerald-400 font-semibold mt-0.5">
                   {stats.remaining} Remaining to deploy
                 </div>
               </div>
 
-              <div className="p-3.5 rounded-2xl bg-purple-950/20 border border-purple-800/50">
+              <div className="p-4 rounded-2xl bg-purple-950/20 border border-purple-800/50">
                 <div className="flex items-center gap-1.5 text-xs text-purple-400 mb-1">
-                  <Sparkles className="w-3.5 h-3.5" />
-                  <span>Non-Quota Relocations</span>
+                  <Sparkles className="w-4 h-4" />
+                  <span className="font-semibold">Non-Quota Relocations</span>
                 </div>
-                <div className="text-xl font-black text-purple-300">
-                  {stats.nonQuotaRelocated} <span className="text-xs font-normal text-purple-400/80">cams</span>
+                <div className="text-2xl font-black text-purple-300">
+                  {stats.nonQuotaRelocated} <span className="text-xs font-normal text-purple-400/80">cameras</span>
                 </div>
-                <div className="text-[10px] text-purple-400 font-semibold mt-0.5">
-                  Outside 100 Quota
-                </div>
-              </div>
-
-              <div className="p-3.5 rounded-2xl bg-zinc-950/60 border border-zinc-800/50">
-                <div className="flex items-center gap-1.5 text-xs text-zinc-400 mb-1">
-                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Contractor Team</span>
-                </div>
-                <div className="text-base font-bold text-white truncate">
-                  Cod Surv Store
-                </div>
-                <div className="text-[10px] text-emerald-400 font-medium mt-0.5">
-                  Third-Party Service
+                <div className="text-[11px] text-purple-400 font-semibold mt-0.5">
+                  Outside 100 Annual Quota
                 </div>
               </div>
             </div>
@@ -696,7 +683,7 @@ export default function DisplayWallboardPage() {
       <footer className="pt-4 border-t border-zinc-900 flex flex-col sm:flex-row items-center justify-between text-xs text-zinc-500 gap-2">
         <div className="flex items-center gap-2 font-medium">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-          <span>Cod Surv Store — COD Third-Party Contractor Monitor</span>
+          <span>Cod Surv Store — Live Surveillance Wallboard</span>
           <span>•</span>
           <span>100 Annual Camera Quota Tracking</span>
         </div>

@@ -96,7 +96,6 @@ export default function RelocationsPage() {
       const matchesSearch =
         item.siteName.toLowerCase().includes(q) ||
         (item.cameraModel && item.cameraModel.toLowerCase().includes(q)) ||
-        item.technicianName.toLowerCase().includes(q) ||
         (item.notes && item.notes.toLowerCase().includes(q));
 
       let matchesFilter = true;
@@ -148,7 +147,7 @@ export default function RelocationsPage() {
     cameraModel: string;
     inventoryItemId?: string;
     relocationDate: string;
-    technicianName: string;
+    technicianName?: string;
     status: RelocationStatus;
     isQuotaProject: boolean;
     notes?: string;
@@ -161,7 +160,7 @@ export default function RelocationsPage() {
         cameraModel: data.cameraModel,
         inventoryItemId: data.inventoryItemId,
         relocationDate: data.relocationDate,
-        technicianName: data.technicianName,
+        technicianName: data.technicianName || "",
         status: data.status,
         isQuotaProject: data.isQuotaProject,
         notes: data.notes,
@@ -173,7 +172,7 @@ export default function RelocationsPage() {
         cameraModel: data.cameraModel,
         inventoryItemId: data.inventoryItemId,
         relocationDate: data.relocationDate,
-        technicianName: data.technicianName,
+        technicianName: data.technicianName || "",
         status: data.status,
         isQuotaProject: data.isQuotaProject,
         notes: data.notes,
@@ -220,7 +219,7 @@ export default function RelocationsPage() {
           <div className="space-y-2 max-w-xl">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold">
               <Sparkles className="w-3.5 h-3.5" />
-              <span>COD Third-Party Contractor Deployment</span>
+              <span>COD Annual Camera Relocation Project</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
               COD Annual Camera Relocations & Deployment
@@ -394,7 +393,7 @@ export default function RelocationsPage() {
               <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
               <input
                 type="text"
-                placeholder="Search site, technician..."
+                placeholder="Search site, camera model..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-9 pr-3.5 py-1.5 rounded-xl text-xs bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-white transition-all"
@@ -502,18 +501,10 @@ export default function RelocationsPage() {
                       </span>
                     </div>
 
-                    {/* Meta info: Date & Technician */}
-                    <div className="grid grid-cols-2 gap-2 text-xs text-zinc-500 dark:text-zinc-400">
-                      <div className="flex items-center gap-1.5">
-                        <Calendar className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
-                        <span className="truncate">{item.relocationDate}</span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <User className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
-                        <span className="truncate font-medium text-zinc-700 dark:text-zinc-300">
-                          {item.technicianName}
-                        </span>
-                      </div>
+                    {/* Meta info: Date */}
+                    <div className="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400">
+                      <Calendar className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
+                      <span>{item.relocationDate}</span>
                     </div>
 
                     {/* Notes if any */}

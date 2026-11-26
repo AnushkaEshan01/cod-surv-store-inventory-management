@@ -181,7 +181,7 @@ export default function InventoryDashboard() {
               </span>
             </div>
             <p className="text-xs text-zinc-400 mt-0.5">
-              <strong className="text-emerald-400 font-semibold">{projectStats.totalRelocated}</strong> of {annualTarget} COD cameras relocated • <strong className="text-amber-400 font-semibold">{projectStats.remaining}</strong> remaining to deploy
+              <strong className="text-emerald-400 font-semibold">{projectStats.totalRelocated}</strong> of {annualTarget} COD cameras relocated • <strong className="text-amber-400 font-semibold">{projectStats.remaining}</strong> remaining • <strong className="text-purple-400 font-semibold">{projectStats.nonQuotaRelocated}</strong> non-quota
             </p>
           </div>
         </div>

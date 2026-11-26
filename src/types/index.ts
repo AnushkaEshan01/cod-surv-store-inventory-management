@@ -50,13 +50,14 @@ export type RelocationStatus = "Completed" | "In Progress" | "Pending";
 
 export interface CameraRelocation {
   id: string;
-  siteName: string; // e.g. "Sampath Bank - Colombo 03"
+  siteName: string; // e.g. "COD - Colombo Central Hub"
   cameraCount: number; // e.g. 4
   cameraModel?: string; // e.g. "Hikvision 4MP IP Dome"
   inventoryItemId?: string; // optional linked inventory item
   relocationDate: string; // ISO or YYYY-MM-DD
   technicianName: string; // e.g. "Kasun Perera"
   status: RelocationStatus;
+  isQuotaProject?: boolean; // true = Part of COD 100 Annual Quota; false = Non-Quota / Other
   notes?: string;
   createdAt: string;
   updatedAt?: string;
@@ -64,9 +65,10 @@ export interface CameraRelocation {
 
 export interface CameraProjectStats {
   annualTarget: number;
-  totalRelocated: number;
-  remaining: number;
-  progressPercentage: number;
+  totalRelocated: number; // strictly quota completed cameras (e.g. 62)
+  remaining: number; // annualTarget - totalRelocated (e.g. 38)
+  progressPercentage: number; // 62%
+  nonQuotaRelocated: number; // separate count for non-100 quota camera relocations
   inProgressCount: number;
   pendingCount: number;
   totalSites: number;

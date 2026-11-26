@@ -99,8 +99,16 @@ export default function RelocationsPage() {
         item.technicianName.toLowerCase().includes(q) ||
         (item.notes && item.notes.toLowerCase().includes(q));
 
-      const matchesStatus = statusFilter === "All" || item.status === statusFilter;
-      return matchesSearch && matchesStatus;
+      let matchesFilter = true;
+      if (statusFilter === "COD 100 Quota") {
+        matchesFilter = item.isQuotaProject !== false;
+      } else if (statusFilter === "Non-Quota") {
+        matchesFilter = item.isQuotaProject === false;
+      } else if (statusFilter !== "All") {
+        matchesFilter = item.status === statusFilter;
+      }
+
+      return matchesSearch && matchesFilter;
     });
   }, [relocations, searchQuery, statusFilter]);
 
@@ -142,6 +150,7 @@ export default function RelocationsPage() {
     relocationDate: string;
     technicianName: string;
     status: RelocationStatus;
+    isQuotaProject: boolean;
     notes?: string;
     deductStock?: boolean;
   }) => {
@@ -154,6 +163,7 @@ export default function RelocationsPage() {
         relocationDate: data.relocationDate,
         technicianName: data.technicianName,
         status: data.status,
+        isQuotaProject: data.isQuotaProject,
         notes: data.notes,
       });
     } else {
@@ -165,6 +175,7 @@ export default function RelocationsPage() {
         relocationDate: data.relocationDate,
         technicianName: data.technicianName,
         status: data.status,
+        isQuotaProject: data.isQuotaProject,
         notes: data.notes,
       });
 
@@ -310,20 +321,20 @@ export default function RelocationsPage() {
           </div>
         </div>
 
-        {/* Card 4: Active Sites */}
+        {/* Card 4: Non-Quota Camera Relocations (Outside 100 Quota) */}
         <div className="glass-card rounded-3xl p-5 border border-zinc-200/60 dark:border-zinc-800/60 shadow-sm relative overflow-hidden">
-          <div className="flex items-center justify-between text-indigo-600 dark:text-indigo-400 mb-2">
-            <span className="text-xs font-semibold tracking-wide uppercase">Deployed Sites</span>
-            <MapPin className="w-4 h-4" />
+          <div className="flex items-center justify-between text-purple-600 dark:text-purple-400 mb-2">
+            <span className="text-xs font-semibold tracking-wide uppercase">Non-Quota Relocations</span>
+            <Sparkles className="w-4 h-4 text-purple-500" />
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-3xl sm:text-4xl font-extrabold text-indigo-600 dark:text-indigo-400 tracking-tight">
-              {stats.totalSites}
+            <span className="text-3xl sm:text-4xl font-extrabold text-purple-600 dark:text-purple-400 tracking-tight">
+              {stats.nonQuotaRelocated}
             </span>
-            <span className="text-xs font-medium text-zinc-500">Locations</span>
+            <span className="text-xs font-medium text-zinc-500">Cameras</span>
           </div>
-          <div className="mt-3 text-[11px] text-zinc-500">
-            <span>{stats.inProgressCount} in progress</span>
+          <div className="mt-3 text-[11px] text-purple-600 dark:text-purple-400 font-medium">
+            <span>Outside 100 Annual Quota</span>
           </div>
         </div>
       </div>
@@ -391,8 +402,8 @@ export default function RelocationsPage() {
             </div>
 
             {/* Status Tabs */}
-            <div className="flex items-center p-1 rounded-xl bg-zinc-100 dark:bg-zinc-900 border border-zinc-200/60 dark:border-zinc-800/60 text-xs font-medium">
-              {(["All", "Completed", "In Progress", "Pending"] as const).map((tab) => (
+            <div className="flex flex-wrap items-center p-1 rounded-xl bg-zinc-100 dark:bg-zinc-900 border border-zinc-200/60 dark:border-zinc-800/60 text-xs font-medium gap-1">
+              {(["All", "COD 100 Quota", "Non-Quota", "Completed", "In Progress"] as const).map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setStatusFilter(tab)}
@@ -449,9 +460,18 @@ export default function RelocationsPage() {
                           <h4 className="text-sm font-bold text-zinc-950 dark:text-white leading-snug">
                             {item.siteName}
                           </h4>
-                          <span className="text-[11px] text-zinc-500 font-medium">
-                            {item.cameraModel || "CCTV Camera"}
-                          </span>
+                          <div className="flex items-center gap-1.5 mt-0.5">
+                            <span className={`inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider ${
+                              item.isQuotaProject !== false
+                                ? "bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border border-blue-200/60 dark:border-blue-800/40"
+                                : "bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border border-purple-200/60 dark:border-purple-800/40"
+                            }`}>
+                              {item.isQuotaProject !== false ? "COD 100 Quota" : "Non-Quota"}
+                            </span>
+                            <span className="text-[11px] text-zinc-500 font-medium">
+                              {item.cameraModel || "CCTV Camera"}
+                            </span>
+                          </div>
                         </div>
                       </div>
 

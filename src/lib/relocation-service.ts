@@ -25,6 +25,7 @@ export const INITIAL_CAMERA_RELOCATIONS: CameraRelocation[] = [
     relocationDate: new Date(Date.now() - 3600000 * 24 * 5).toISOString().split("T")[0],
     technicianName: "Kasun Perera",
     status: "Completed",
+    isQuotaProject: true,
     notes: "Main warehouse loading dock and sorting facility relocation completed.",
     createdAt: new Date(Date.now() - 3600000 * 24 * 5).toISOString(),
   },
@@ -37,6 +38,7 @@ export const INITIAL_CAMERA_RELOCATIONS: CameraRelocation[] = [
     relocationDate: new Date(Date.now() - 3600000 * 24 * 12).toISOString().split("T")[0],
     technicianName: "Nuwan Silva",
     status: "Completed",
+    isQuotaProject: true,
     notes: "Perimeter fence and dispatch bay camera relocation.",
     createdAt: new Date(Date.now() - 3600000 * 24 * 12).toISOString(),
   },
@@ -49,6 +51,7 @@ export const INITIAL_CAMERA_RELOCATIONS: CameraRelocation[] = [
     relocationDate: new Date(Date.now() - 3600000 * 24 * 20).toISOString().split("T")[0],
     technicianName: "Pradeep Kumara",
     status: "Completed",
+    isQuotaProject: true,
     notes: "Internal storage racks and security perimeter repositioning.",
     createdAt: new Date(Date.now() - 3600000 * 24 * 20).toISOString(),
   },
@@ -61,6 +64,7 @@ export const INITIAL_CAMERA_RELOCATIONS: CameraRelocation[] = [
     relocationDate: new Date(Date.now() - 3600000 * 24 * 28).toISOString().split("T")[0],
     technicianName: "Kasun Perera",
     status: "Completed",
+    isQuotaProject: true,
     notes: "Security gate and express counter coverage upgrade.",
     createdAt: new Date(Date.now() - 3600000 * 24 * 28).toISOString(),
   },
@@ -73,6 +77,7 @@ export const INITIAL_CAMERA_RELOCATIONS: CameraRelocation[] = [
     relocationDate: new Date(Date.now() - 3600000 * 24 * 35).toISOString().split("T")[0],
     technicianName: "Nuwan Silva",
     status: "Completed",
+    isQuotaProject: true,
     notes: "Heavy vehicle parking and loading bay camera relocation.",
     createdAt: new Date(Date.now() - 3600000 * 24 * 35).toISOString(),
   },
@@ -85,6 +90,7 @@ export const INITIAL_CAMERA_RELOCATIONS: CameraRelocation[] = [
     relocationDate: new Date(Date.now() - 3600000 * 24 * 42).toISOString().split("T")[0],
     technicianName: "Pradeep Kumara",
     status: "Completed",
+    isQuotaProject: true,
     notes: "Parcel sorting lines and conveyor belt surveillance relocation.",
     createdAt: new Date(Date.now() - 3600000 * 24 * 42).toISOString(),
   },
@@ -97,13 +103,41 @@ export const INITIAL_CAMERA_RELOCATIONS: CameraRelocation[] = [
     relocationDate: new Date(Date.now() + 3600000 * 24 * 3).toISOString().split("T")[0],
     technicianName: "Kasun Perera",
     status: "In Progress",
+    isQuotaProject: true,
     notes: "Northern provincial hub setup underway.",
     createdAt: new Date().toISOString(),
   },
+  // Non-Quota Relocations (Outside the 100 Annual Quota)
+  {
+    id: "reloc-extra-1",
+    siteName: "Keells Super - Nawala Retail Store",
+    cameraCount: 10,
+    cameraModel: "Hikvision 4MP IP Dome Camera",
+    inventoryItemId: "item-1",
+    relocationDate: new Date(Date.now() - 3600000 * 24 * 15).toISOString().split("T")[0],
+    technicianName: "Nuwan Silva",
+    status: "Completed",
+    isQuotaProject: false,
+    notes: "Ad-hoc non-contract relocation for retail store aisles.",
+    createdAt: new Date(Date.now() - 3600000 * 24 * 15).toISOString(),
+  },
+  {
+    id: "reloc-extra-2",
+    siteName: "Singer Mega Showroom - Kandy",
+    cameraCount: 8,
+    cameraModel: "Dahua 2MP Bullet Camera",
+    inventoryItemId: "item-2",
+    relocationDate: new Date(Date.now() - 3600000 * 24 * 22).toISOString().split("T")[0],
+    technicianName: "Pradeep Kumara",
+    status: "Completed",
+    isQuotaProject: false,
+    notes: "Non-quota external parking and storage bay camera installation.",
+    createdAt: new Date(Date.now() - 3600000 * 24 * 22).toISOString(),
+  },
 ];
 
-const LOCAL_STORAGE_RELOCS_KEY = "cod_surv_camera_relocations_v3";
-const LOCAL_STORAGE_TARGET_KEY = "cod_surv_annual_camera_target_v3";
+const LOCAL_STORAGE_RELOCS_KEY = "cod_surv_camera_relocations_v4";
+const LOCAL_STORAGE_TARGET_KEY = "cod_surv_annual_camera_target_v4";
 
 function getLocalRelocations(): CameraRelocation[] {
   if (typeof window === "undefined") return INITIAL_CAMERA_RELOCATIONS;
@@ -144,8 +178,18 @@ export function calculateProjectStats(
   relocations: CameraRelocation[],
   annualTarget: number = DEFAULT_ANNUAL_TARGET
 ): CameraProjectStats {
-  const completedRelocs = relocations.filter((r) => r.status === "Completed");
-  const totalRelocated = completedRelocs.reduce((sum, r) => sum + (Number(r.cameraCount) || 0), 0);
+  // Quota relocations: isQuotaProject !== false (defaults to true for COD annual project)
+  const quotaCompleted = relocations.filter(
+    (r) => r.isQuotaProject !== false && r.status === "Completed"
+  );
+  const totalRelocated = quotaCompleted.reduce((sum, r) => sum + (Number(r.cameraCount) || 0), 0);
+
+  // Non-quota relocations: isQuotaProject === false
+  const nonQuotaCompleted = relocations.filter(
+    (r) => r.isQuotaProject === false && r.status === "Completed"
+  );
+  const nonQuotaRelocated = nonQuotaCompleted.reduce((sum, r) => sum + (Number(r.cameraCount) || 0), 0);
+
   const inProgressCount = relocations
     .filter((r) => r.status === "In Progress")
     .reduce((sum, r) => sum + (Number(r.cameraCount) || 0), 0);
@@ -162,6 +206,7 @@ export function calculateProjectStats(
     totalRelocated,
     remaining,
     progressPercentage,
+    nonQuotaRelocated,
     inProgressCount,
     pendingCount,
     totalSites: uniqueSites,
@@ -203,6 +248,7 @@ export function subscribeToCameraRelocations(
               relocationDate: data.relocationDate || new Date().toISOString().split("T")[0],
               technicianName: data.technicianName || "Field Technician",
               status: data.status || "Completed",
+              isQuotaProject: data.isQuotaProject !== false,
               notes: data.notes || "",
               createdAt,
             };

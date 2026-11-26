@@ -46,6 +46,7 @@ export default function DisplayWallboardPage() {
   const [inventoryItems, setInventoryItems] = useState<InventoryItem[]>([]);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [hideNavBar, setHideNavBar] = useState(false);
 
   // TV View Mode: "selected" | "low-stock" | "all"
   const [viewFilter, setViewFilter] = useState<"selected" | "low-stock" | "all">("selected");
@@ -230,74 +231,103 @@ export default function DisplayWallboardPage() {
     day: "numeric",
   });
 
+  const isFullViewActive = isFullscreen || hideNavBar;
+
   return (
-    <div className="min-h-screen bg-zinc-950 text-white font-sans antialiased p-4 sm:p-6 lg:p-8 flex flex-col justify-between selection:bg-emerald-500 selection:text-black">
-      {/* Top Bar / Header */}
-      <header className="flex flex-col sm:flex-row items-center justify-between gap-4 pb-6 border-b border-zinc-800/80">
-        {/* Brand & Mode */}
-        <div className="flex items-center gap-4">
-          <Link
-            href="/"
-            className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white border border-zinc-800 text-xs font-medium transition-all"
-            title="Back to Web App"
-          >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Store Dashboard</span>
-          </Link>
-
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-white text-zinc-950 flex items-center justify-center font-bold shadow-lg shadow-white/5">
-              <Layers className="w-5 h-5 stroke-[2.4]" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-lg font-extrabold tracking-tight text-white">
-                  Cod Surv
-                </span>
-                <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                  Office Wallboard
-                </span>
-              </div>
-              <span className="text-xs text-zinc-400 font-medium">
-                COD Camera Relocations & Live Inventory Monitor
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Live Status & Clock & Fullscreen Toggle */}
-        <div className="flex items-center gap-5">
-          {/* Live Sync Status */}
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-950/40 border border-emerald-800/40 text-emerald-400 text-xs font-semibold">
+    <div className="min-h-screen bg-zinc-950 text-white font-sans antialiased p-4 sm:p-6 lg:p-8 flex flex-col justify-between selection:bg-emerald-500 selection:text-black relative">
+      {/* Floating Button when Full View / Fullscreen is Active */}
+      {isFullViewActive && (
+        <div className="fixed top-3 right-3 z-50 flex items-center gap-2 animate-fade-in">
+          <div className="px-3 py-1.5 rounded-full bg-zinc-900/90 backdrop-blur-md border border-zinc-700/80 text-xs text-zinc-300 font-mono shadow-2xl flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-            <Radio className="w-3.5 h-3.5" />
-            <span className="hidden md:inline">REALTIME SYNC</span>
+            <span>{formattedTime}</span>
           </div>
-
-          {/* Large Digital Clock */}
-          <div className="text-right">
-            <div className="text-2xl sm:text-3xl font-mono font-extrabold tracking-tight text-white drop-shadow-sm">
-              {formattedTime}
-            </div>
-            <div className="text-[11px] font-medium text-zinc-400">
-              {formattedDate}
-            </div>
-          </div>
-
-          {/* Fullscreen Button */}
           <button
-            onClick={toggleFullscreen}
-            className="p-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white border border-zinc-800 transition-colors shadow-sm"
-            title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+            onClick={() => {
+              if (document.fullscreenElement) {
+                document.exitFullscreen().catch(() => {});
+              }
+              setHideNavBar(false);
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-900/90 backdrop-blur-md hover:bg-zinc-800 border border-zinc-700/80 text-zinc-300 hover:text-white transition-all shadow-2xl text-xs font-semibold"
+            title="Exit Full View (Show Header)"
           >
-            {isFullscreen ? (
-              <Minimize2 className="w-4 h-4" />
-            ) : (
-              <Maximize2 className="w-4 h-4" />
-            )}
+            <Minimize2 className="w-3.5 h-3.5" />
+            <span>Show Nav Bar</span>
           </button>
         </div>
-      </header>
+      )}
+
+      {/* Top Bar / Header (Hidden when in Full View or Fullscreen) */}
+      {!isFullViewActive && (
+        <header className="flex flex-col sm:flex-row items-center justify-between gap-4 pb-6 border-b border-zinc-800/80 animate-fade-in">
+          {/* Brand & Mode */}
+          <div className="flex items-center gap-4">
+            <Link
+              href="/"
+              className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white border border-zinc-800 text-xs font-medium transition-all"
+              title="Back to Web App"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>Store Dashboard</span>
+            </Link>
+
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-white text-zinc-950 flex items-center justify-center font-bold shadow-lg shadow-white/5">
+                <Layers className="w-5 h-5 stroke-[2.4]" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-lg font-extrabold tracking-tight text-white">
+                    Cod Surv
+                  </span>
+                  <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                    Office Wallboard
+                  </span>
+                </div>
+                <span className="text-xs text-zinc-400 font-medium">
+                  COD Camera Relocations & Live Inventory Monitor
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Live Status & Clock & Full View Controls */}
+          <div className="flex items-center gap-3 sm:gap-4">
+            {/* Live Sync Status */}
+            <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-950/40 border border-emerald-800/40 text-emerald-400 text-xs font-semibold">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+              <Radio className="w-3.5 h-3.5" />
+              <span>REALTIME SYNC</span>
+            </div>
+
+            {/* Large Digital Clock */}
+            <div className="text-right">
+              <div className="text-2xl sm:text-3xl font-mono font-extrabold tracking-tight text-white drop-shadow-sm">
+                {formattedTime}
+              </div>
+              <div className="text-[11px] font-medium text-zinc-400">
+                {formattedDate}
+              </div>
+            </div>
+
+            {/* Full View & Fullscreen Buttons */}
+            <div className="flex items-center gap-1.5 pl-2 border-l border-zinc-800">
+              <button
+                onClick={() => {
+                  setHideNavBar(true);
+                  toggleFullscreen();
+                }}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white border border-zinc-800 text-xs font-semibold transition-all hover:scale-105 shadow-sm"
+                title="Full View (Hide Header & Enter Fullscreen)"
+              >
+                <Maximize2 className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Full View</span>
+              </button>
+            </div>
+          </div>
+        </header>
+      )}
 
       {/* Main Content Grid: Left side COD Relocations, Right side Inventory */}
       <main className="my-6 grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1">
@@ -383,18 +413,31 @@ export default function DisplayWallboardPage() {
               </div>
             </div>
 
-            {/* Contract Overview Cards */}
-            <div className="grid grid-cols-2 gap-3.5 pt-4 border-t border-zinc-800/60">
+            {/* Contract & Relocation Overview Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-4 border-t border-zinc-800/60">
               <div className="p-3.5 rounded-2xl bg-zinc-950/60 border border-zinc-800/50">
-                <div className="flex items-center gap-1.5 text-xs text-zinc-400 mb-1">
-                  <Building2 className="w-3.5 h-3.5 text-blue-400" />
-                  <span>Target Client</span>
+                <div className="flex items-center gap-1.5 text-xs text-blue-400 mb-1">
+                  <Building2 className="w-3.5 h-3.5" />
+                  <span>COD 100 Quota</span>
                 </div>
-                <div className="text-base font-bold text-white">
-                  COD Corporation
+                <div className="text-xl font-black text-white">
+                  {stats.totalRelocated} <span className="text-xs font-normal text-zinc-500">/ {annualTarget}</span>
                 </div>
-                <div className="text-[10px] text-zinc-500 font-medium mt-0.5">
-                  Annual Surveillance SLA
+                <div className="text-[10px] text-emerald-400 font-semibold mt-0.5">
+                  {stats.remaining} Remaining to deploy
+                </div>
+              </div>
+
+              <div className="p-3.5 rounded-2xl bg-purple-950/20 border border-purple-800/50">
+                <div className="flex items-center gap-1.5 text-xs text-purple-400 mb-1">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>Non-Quota Relocations</span>
+                </div>
+                <div className="text-xl font-black text-purple-300">
+                  {stats.nonQuotaRelocated} <span className="text-xs font-normal text-purple-400/80">cams</span>
+                </div>
+                <div className="text-[10px] text-purple-400 font-semibold mt-0.5">
+                  Outside 100 Quota
                 </div>
               </div>
 
@@ -403,19 +446,24 @@ export default function DisplayWallboardPage() {
                   <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
                   <span>Contractor Team</span>
                 </div>
-                <div className="text-base font-bold text-white">
+                <div className="text-base font-bold text-white truncate">
                   Cod Surv Store
                 </div>
                 <div className="text-[10px] text-emerald-400 font-medium mt-0.5">
-                  Third-Party Installation
+                  Third-Party Service
                 </div>
               </div>
             </div>
 
             {/* Bottom Note */}
             <div className="mt-5 pt-3 border-t border-zinc-800/60 flex items-center justify-between text-xs text-zinc-500">
-              <span>Only COD Relocations tracked here</span>
-              <span className="text-emerald-400 font-medium">● 62 Done / 38 Left</span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                <span>COD 100 Quota: <strong>62 Done</strong> (38 Left)</span>
+              </span>
+              <span className="text-purple-400 font-medium">
+                ★ {stats.nonQuotaRelocated} Non-Quota Relocations
+              </span>
             </div>
           </div>
         </section>

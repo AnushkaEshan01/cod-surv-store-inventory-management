@@ -15,6 +15,7 @@ interface RelocationModalProps {
     relocationDate: string;
     technicianName: string;
     status: RelocationStatus;
+    isQuotaProject: boolean;
     notes?: string;
     deductStock?: boolean;
   }) => Promise<void>;
@@ -37,6 +38,7 @@ export function RelocationModal({
   const [relocationDate, setRelocationDate] = useState(new Date().toISOString().split("T")[0]);
   const [technicianName, setTechnicianName] = useState("");
   const [status, setStatus] = useState<RelocationStatus>("Completed");
+  const [isQuotaProject, setIsQuotaProject] = useState(true);
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -56,6 +58,7 @@ export function RelocationModal({
       setRelocationDate(editItem.relocationDate || new Date().toISOString().split("T")[0]);
       setTechnicianName(editItem.technicianName || "");
       setStatus(editItem.status || "Completed");
+      setIsQuotaProject(editItem.isQuotaProject !== false);
       setNotes(editItem.notes || "");
     } else {
       setSiteName("");
@@ -66,6 +69,7 @@ export function RelocationModal({
       setRelocationDate(new Date().toISOString().split("T")[0]);
       setTechnicianName("");
       setStatus("Completed");
+      setIsQuotaProject(true);
       setNotes("");
     }
     setError(null);
@@ -109,6 +113,7 @@ export function RelocationModal({
         relocationDate,
         technicianName: technicianName.trim(),
         status,
+        isQuotaProject,
         notes: notes.trim(),
         deductStock: !editItem && deductStock && Boolean(selectedInventoryId),
       });
@@ -154,6 +159,53 @@ export function RelocationModal({
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Quota vs Non-Quota Selector */}
+          <div className="p-3.5 rounded-2xl bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200/60 dark:border-zinc-800/60 space-y-2">
+            <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+              Project Quota Category *
+            </label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+              <label
+                className={`flex items-center gap-2 p-2.5 rounded-xl border cursor-pointer transition-all ${
+                  isQuotaProject
+                    ? "bg-blue-50 dark:bg-blue-950/40 border-blue-400 text-blue-900 dark:text-blue-200 font-semibold"
+                    : "bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300"
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="quotaType"
+                  checked={isQuotaProject}
+                  onChange={() => setIsQuotaProject(true)}
+                  className="text-blue-600 focus:ring-blue-500"
+                />
+                <span>COD 100 Annual Quota</span>
+              </label>
+
+              <label
+                className={`flex items-center gap-2 p-2.5 rounded-xl border cursor-pointer transition-all ${
+                  !isQuotaProject
+                    ? "bg-purple-50 dark:bg-purple-950/40 border-purple-400 text-purple-900 dark:text-purple-200 font-semibold"
+                    : "bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300"
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="quotaType"
+                  checked={!isQuotaProject}
+                  onChange={() => setIsQuotaProject(false)}
+                  className="text-purple-600 focus:ring-purple-500"
+                />
+                <span>Non-Quota (Outside 100)</span>
+              </label>
+            </div>
+            <p className="text-[11px] text-zinc-500">
+              {isQuotaProject
+                ? "This relocation will be counted towards the 100 annual camera allocation."
+                : "This relocation is outside the 100 quota and will be tracked separately."}
+            </p>
+          </div>
+
           {/* Site / Location Name */}
           <div>
             <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1.5">

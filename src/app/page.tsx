@@ -175,13 +175,13 @@ export default function InventoryDashboard() {
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-sm font-bold text-white">Annual Camera Relocations Project</span>
+              <span className="text-sm font-bold text-white">COD Annual Camera Allocation Project</span>
               <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
                 {projectStats.progressPercentage}% Complete
               </span>
             </div>
             <p className="text-xs text-zinc-400 mt-0.5">
-              <strong className="text-emerald-400 font-semibold">{projectStats.totalRelocated}</strong> of {annualTarget} cameras relocated • <strong className="text-amber-400 font-semibold">{projectStats.remaining}</strong> remaining to deploy
+              <strong className="text-emerald-400 font-semibold">{projectStats.totalRelocated}</strong> of {annualTarget} COD cameras relocated • <strong className="text-amber-400 font-semibold">{projectStats.remaining}</strong> remaining to deploy
             </p>
           </div>
         </div>

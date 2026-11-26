@@ -207,15 +207,15 @@ export default function RelocationsPage() {
       <div className="relative overflow-hidden rounded-3xl p-6 sm:p-8 bg-gradient-to-br from-zinc-900 via-zinc-900 to-zinc-800 text-white shadow-xl border border-zinc-700/50">
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2 max-w-xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold">
               <Sparkles className="w-3.5 h-3.5" />
-              <span>Annual Camera Deployment Project</span>
+              <span>COD Third-Party Contractor Deployment</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
-              CCTV Camera Relocations & Deployment
+              COD Annual Camera Relocations & Deployment
             </h1>
             <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed">
-              Monitoring annual quota of <strong className="text-white font-semibold">{annualTarget} cameras</strong> across branch locations, client installations, and site relocations.
+              Monitoring annual allocation of <strong className="text-white font-semibold">{annualTarget} cameras</strong> for COD facilities and operations.
             </p>
           </div>
 

@@ -6,6 +6,7 @@ import { subscribeToInventory, subscribeToTransactions } from "@/lib/inventory-s
 import { useAuth } from "@/lib/auth-context";
 import {
   exportWeeklyReportToPDF,
+  exportReportToCSV,
   exportInventoryToCSV,
   exportTransactionsToCSV,
 } from "@/lib/export-utils";
@@ -25,6 +26,7 @@ export default function ReportsPage() {
   const [items, setItems] = useState<InventoryItem[]>([]);
   const [logs, setLogs] = useState<TransactionLog[]>([]);
   const [loading, setLoading] = useState(true);
+  const [includeLogs, setIncludeLogs] = useState(true);
 
   useEffect(() => {
     setLoading(true);
@@ -87,22 +89,70 @@ export default function ReportsPage() {
         {/* Quick Action Export Buttons */}
         <div className="flex flex-wrap items-center gap-2">
           <button
-            onClick={() => exportWeeklyReportToPDF(items, logs, adminEmail)}
+            onClick={() => exportWeeklyReportToPDF(items, logs, adminEmail, includeLogs)}
             disabled={loading || items.length === 0}
             className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-medium bg-zinc-900 hover:bg-zinc-800 dark:bg-white dark:hover:bg-zinc-100 text-white dark:text-zinc-950 shadow-sm transition-all disabled:opacity-50"
           >
             <FileText className="w-4 h-4" />
-            <span>Generate Weekly PDF</span>
+            <span>Generate PDF {includeLogs ? "(With Logs)" : "(Stock Only)"}</span>
           </button>
 
           <button
-            onClick={() => exportInventoryToCSV(items)}
+            onClick={() => exportReportToCSV(items, logs, includeLogs)}
             disabled={loading || items.length === 0}
             className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-medium bg-white/70 dark:bg-zinc-800/70 hover:bg-white dark:hover:bg-zinc-800 text-zinc-800 dark:text-zinc-200 border border-zinc-200/60 dark:border-zinc-700/60 shadow-2xs transition-all disabled:opacity-50"
           >
             <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
-            <span>Export Stock CSV</span>
+            <span>Export CSV {includeLogs ? "(With Logs)" : "(Stock Only)"}</span>
           </button>
+        </div>
+      </div>
+
+      {/* Report Option: With Logs vs Without Logs Selector */}
+      <div className="glass-card rounded-3xl p-5 border border-zinc-200/80 dark:border-zinc-800/80 bg-gradient-to-r from-zinc-50/60 to-white/40 dark:from-zinc-900/60 dark:to-zinc-950/40">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
+              Report Content Scope
+            </span>
+            <h3 className="text-sm font-bold text-zinc-900 dark:text-white">
+              Select Report Detail Level
+            </h3>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400">
+              {includeLogs
+                ? "Full executive report: includes active stock table + recent stock movement audit logs."
+                : "Stock summary only: includes current inventory quantities and status health, excluding audit logs."}
+            </p>
+          </div>
+
+          {/* Toggle Pills */}
+          <div className="inline-flex p-1.5 rounded-2xl bg-zinc-200/70 dark:bg-zinc-800/80 border border-zinc-300/60 dark:border-zinc-700/60">
+            <button
+              type="button"
+              onClick={() => setIncludeLogs(true)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                includeLogs
+                  ? "bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white shadow-sm"
+                  : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
+              }`}
+            >
+              <FileText className={`w-3.5 h-3.5 ${includeLogs ? "text-blue-600" : "text-zinc-400"}`} />
+              <span>With Audit Logs</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setIncludeLogs(false)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                !includeLogs
+                  ? "bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white shadow-sm"
+                  : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
+              }`}
+            >
+              <Boxes className={`w-3.5 h-3.5 ${!includeLogs ? "text-emerald-600" : "text-zinc-400"}`} />
+              <span>Without Logs (Stock Only)</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -252,21 +302,37 @@ export default function ReportsPage() {
           </div>
           <div>
             <h3 className="text-sm font-semibold text-zinc-900 dark:text-white">
-              Weekly Printable Audit & Stock PDF
+              {includeLogs
+                ? "Printable Audit & Stock Report (With Logs)"
+                : "Stock Inventory Summary Report (Without Logs)"}
             </h3>
             <p className="text-xs text-zinc-500 mt-0.5">
-              Includes comprehensive product table, threshold alerts, and last 10 audit logs.
+              {includeLogs
+                ? "Includes comprehensive product catalog, threshold alerts, and verified stock movement audit history."
+                : "Includes comprehensive product catalog, categories, quantities, and threshold status (audit logs excluded)."}
             </p>
           </div>
         </div>
 
-        <button
-          onClick={() => exportWeeklyReportToPDF(items, logs, adminEmail)}
-          className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-xs font-medium bg-zinc-900 hover:bg-zinc-800 dark:bg-white dark:hover:bg-zinc-100 text-white dark:text-zinc-950 shadow-sm transition-all"
-        >
-          <Download className="w-4 h-4" />
-          <span>Download PDF Report</span>
-        </button>
+        <div className="w-full sm:w-auto flex flex-col sm:flex-row items-center gap-2">
+          <button
+            onClick={() => exportWeeklyReportToPDF(items, logs, adminEmail, includeLogs)}
+            disabled={loading || items.length === 0}
+            className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-xs font-semibold bg-zinc-900 hover:bg-zinc-800 dark:bg-white dark:hover:bg-zinc-100 text-white dark:text-zinc-950 shadow-sm transition-all disabled:opacity-50"
+          >
+            <Download className="w-4 h-4" />
+            <span>Download PDF</span>
+          </button>
+
+          <button
+            onClick={() => exportReportToCSV(items, logs, includeLogs)}
+            disabled={loading || items.length === 0}
+            className="w-full sm:w-auto flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-semibold bg-white/70 dark:bg-zinc-800/70 hover:bg-white dark:hover:bg-zinc-800 text-zinc-800 dark:text-zinc-200 border border-zinc-200/60 dark:border-zinc-700/60 shadow-2xs transition-all disabled:opacity-50"
+          >
+            <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
+            <span>Download CSV</span>
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -92,12 +92,71 @@ export function exportTransactionsToCSV(logs: TransactionLog[]) {
 }
 
 /**
+ * Export report to CSV (With or Without logs)
+ */
+export function exportReportToCSV(
+  items: InventoryItem[],
+  logs: TransactionLog[],
+  includeLogs: boolean = true
+) {
+  if (!includeLogs) {
+    exportInventoryToCSV(items);
+    return;
+  }
+
+  const headers = [
+    "Record Type",
+    "ID",
+    "Item Name",
+    "Category / Action",
+    "Quantity / Amount",
+    "Unit / Admin User",
+    "Status / Timestamp",
+    "Notes / Description",
+  ];
+
+  const inventoryRows = items.map((it) => {
+    const status = getStockStatus(it.quantity, it.lowStockThreshold);
+    return [
+      "STOCK ITEM",
+      it.id,
+      it.itemName,
+      it.category,
+      it.quantity,
+      it.unit || "units",
+      status.toUpperCase(),
+      it.description || "",
+    ];
+  });
+
+  const logRows = logs.map((log) => [
+    "AUDIT LOG",
+    log.id,
+    log.itemName,
+    log.transactionType === "IN" ? "STOCK IN" : "STOCK OUT",
+    log.amount,
+    log.userEmail,
+    new Date(log.timestamp).toLocaleString(),
+    log.notes || "",
+  ]);
+
+  const dateStr = new Date().toISOString().split("T")[0];
+  downloadCSV(`CodSurv_Inventory_With_Logs_${dateStr}.csv`, [
+    headers,
+    ...inventoryRows,
+    ["--- MOVEMENT AUDIT LOGS ---", "", "", "", "", "", "", ""],
+    ...logRows,
+  ]);
+}
+
+/**
  * Generate Apple-style minimalist Weekly Inventory & Movement PDF Report
  */
 export function exportWeeklyReportToPDF(
   items: InventoryItem[],
   logs: TransactionLog[],
-  adminEmail: string
+  adminEmail: string,
+  includeLogs: boolean = true
 ) {
   const doc = new jsPDF({
     orientation: "portrait",
@@ -121,7 +180,13 @@ export function exportWeeklyReportToPDF(
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
   doc.setTextColor(...secondaryColor);
-  doc.text("INVENTORY & STOCK MOVEMENT REPORT", 14, 26);
+  doc.text(
+    includeLogs
+      ? "INVENTORY & STOCK MOVEMENT AUDIT REPORT"
+      : "CURRENT STOCK INVENTORY REPORT",
+    14,
+    26
+  );
 
   // Date and Metadata on the right
   const now = new Date();
@@ -149,7 +214,7 @@ export function exportWeeklyReportToPDF(
   doc.setFont("helvetica", "bold");
   doc.setFontSize(11);
   doc.setTextColor(...primaryColor);
-  doc.text("Weekly Overview", 14, 40);
+  doc.text("Inventory Overview", 14, 40);
 
   // 4 mini summary boxes
   const boxWidth = (pageWidth - 28 - 9) / 4;
@@ -237,17 +302,23 @@ export function exportWeeklyReportToPDF(
     },
   });
 
-  // 4. Recent Stock In/Out Transactions
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const finalY = (doc as any).lastAutoTable?.finalY || 150;
+  // 4. Recent Stock In/Out Transactions (Only if includeLogs is true)
+  if (includeLogs && logs.length > 0) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let finalY = (doc as any).lastAutoTable?.finalY || 150;
 
-  if (finalY < 230) {
+    // If less than 60mm remaining on page, start a fresh page
+    if (finalY > 210) {
+      doc.addPage();
+      finalY = 20;
+    }
+
     doc.setFont("helvetica", "bold");
     doc.setFontSize(11);
     doc.setTextColor(...primaryColor);
     doc.text("Recent Transactions Audit Log", 14, finalY + 12);
 
-    const recentLogs = logs.slice(0, 10);
+    const recentLogs = logs.slice(0, 25);
     const logsTableBody = recentLogs.map((log) => [
       new Date(log.timestamp).toLocaleDateString("en-US", {
         month: "short",
@@ -298,7 +369,7 @@ export function exportWeeklyReportToPDF(
     });
   }
 
-  // Footer
+  // Footer on all pages
   const totalPages = doc.getNumberOfPages();
   for (let i = 1; i <= totalPages; i++) {
     doc.setPage(i);
@@ -314,5 +385,8 @@ export function exportWeeklyReportToPDF(
   }
 
   const fileNameDate = now.toISOString().split("T")[0];
-  doc.save(`CodSurv_Weekly_Inventory_Report_${fileNameDate}.pdf`);
+  const filePrefix = includeLogs
+    ? "CodSurv_Inventory_With_Logs"
+    : "CodSurv_Stock_Inventory_Summary";
+  doc.save(`${filePrefix}_${fileNameDate}.pdf`);
 }

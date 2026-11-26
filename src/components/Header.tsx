@@ -14,6 +14,8 @@ import {
   Layers,
   Eye,
   Lock,
+  Camera,
+  Tv,
 } from "lucide-react";
 
 export function Header() {
@@ -22,6 +24,7 @@ export function Header() {
 
   const navLinks = [
     { href: "/", label: "Inventory", icon: Boxes },
+    { href: "/relocations", label: "Camera Relocations", icon: Camera },
     { href: "/transactions", label: "Audit Log", icon: ClipboardList },
     { href: "/reports", label: "Reports", icon: FileBarChart2 },
   ];
@@ -75,7 +78,19 @@ export function Header() {
           </div>
 
           {/* Right Actions & Status */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
+            {/* TV Wallboard Display Mode Button */}
+            <Link
+              href="/display"
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 text-xs font-semibold shadow-xs hover:opacity-90 active:scale-95 transition-all"
+              title="Launch Fullscreen Office Monitor / TV Live Wallboard"
+            >
+              <Tv className="w-3.5 h-3.5 text-emerald-400 dark:text-emerald-600 animate-pulse" />
+              <span>TV Display</span>
+            </Link>
+
             {/* Status Indicator Pill */}
             <div
               className={`hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium border ${

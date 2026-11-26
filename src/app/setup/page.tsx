@@ -6,6 +6,7 @@ import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "fire
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db, isFirebaseConfigured } from "@/lib/firebase";
 import { INITIAL_INVENTORY_ITEMS, INITIAL_TRANSACTION_LOGS } from "@/lib/mock-data";
+import { INITIAL_CAMERA_RELOCATIONS, DEFAULT_ANNUAL_TARGET } from "@/lib/relocation-service";
 import {
   Layers,
   CheckCircle2,
@@ -55,6 +56,18 @@ service cloud.firestore {
       allow read: if true;
       allow create: if isAuthenticated();
       allow update, delete: if false;
+    }
+
+    // Camera Relocations Collection (Public Read for TV Monitor, Authenticated Write)
+    match /camera_relocations/{relocId} {
+      allow read: if true;
+      allow create, update, delete: if isAuthenticated();
+    }
+
+    // Camera Project Settings (Public Read for TV Monitor, Authenticated Write)
+    match /project_settings/{settingId} {
+      allow read: if true;
+      allow create, update, delete: if isAuthenticated();
     }
   }
 }`;
@@ -151,6 +164,23 @@ export default function SetupPage() {
         });
       }
       setStepStatus((prev) => [...prev, `Seeded initial movement logs in 'transaction_logs'.`]);
+
+      // 5. Seed Initial Camera Relocations & Annual Target (100 Cameras Project)
+      setStepStatus((prev) => [...prev, "Setting up Annual 100 Camera Relocation project..."]);
+      for (const reloc of INITIAL_CAMERA_RELOCATIONS) {
+        const relocRef = doc(db, "camera_relocations", reloc.id);
+        await setDoc(relocRef, {
+          ...reloc,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        });
+      }
+      const settingsRef = doc(db, "project_settings", "camera_project");
+      await setDoc(settingsRef, {
+        annualTarget: DEFAULT_ANNUAL_TARGET,
+        updatedAt: serverTimestamp(),
+      });
+      setStepStatus((prev) => [...prev, `Seeded ${INITIAL_CAMERA_RELOCATIONS.length} camera relocations and 100 quota target.`]);
 
       setIsCompleted(true);
       setStepStatus((prev) => [...prev, "Setup successfully finished! Ready for production use."]);

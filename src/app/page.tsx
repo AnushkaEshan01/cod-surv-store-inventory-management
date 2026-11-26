@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { InventoryItem, TransactionType } from "@/types";
+import React, { useState, useEffect, useMemo } from "react";
+import Link from "next/link";
+import { InventoryItem, TransactionType, CameraRelocation } from "@/types";
 import {
   subscribeToInventory,
   addInventoryItem,
@@ -9,19 +10,26 @@ import {
   deleteInventoryItem,
   adjustStock,
 } from "@/lib/inventory-service";
+import {
+  subscribeToCameraRelocations,
+  subscribeToAnnualTarget,
+  calculateProjectStats,
+} from "@/lib/relocation-service";
 import { useAuth } from "@/lib/auth-context";
 import { StatCards } from "@/components/StatCards";
 import { InventoryTable } from "@/components/InventoryTable";
 import { ProductModal } from "@/components/ProductModal";
 import { StockActionModal } from "@/components/StockActionModal";
 import { DeleteConfirmModal } from "@/components/DeleteConfirmModal";
-import { CheckCircle2, AlertCircle } from "lucide-react";
+import { CheckCircle2, AlertCircle, Camera, Tv, ArrowRight, Sparkles } from "lucide-react";
 
 import { AdminRequiredModal } from "@/components/AdminRequiredModal";
 
 export default function InventoryDashboard() {
   const { user, isAdmin } = useAuth();
   const [items, setItems] = useState<InventoryItem[]>([]);
+  const [relocations, setRelocations] = useState<CameraRelocation[]>([]);
+  const [annualTarget, setAnnualTarget] = useState<number>(100);
   const [loading, setLoading] = useState(true);
 
   // Admin access requirement modal state
@@ -57,10 +65,10 @@ export default function InventoryDashboard() {
     }, 4000);
   };
 
-  // Subscribe to real-time inventory updates
+  // Subscribe to real-time inventory and relocations
   useEffect(() => {
     setLoading(true);
-    const unsubscribe = subscribeToInventory(
+    const unsubInv = subscribeToInventory(
       (updatedItems) => {
         setItems(updatedItems);
         setLoading(false);
@@ -71,8 +79,24 @@ export default function InventoryDashboard() {
       }
     );
 
-    return () => unsubscribe();
+    const unsubRelocs = subscribeToCameraRelocations((relocs) => {
+      setRelocations(relocs);
+    });
+
+    const unsubTarget = subscribeToAnnualTarget((target) => {
+      setAnnualTarget(target);
+    });
+
+    return () => {
+      unsubInv();
+      unsubRelocs();
+      unsubTarget();
+    };
   }, []);
+
+  const projectStats = useMemo(() => {
+    return calculateProjectStats(relocations, annualTarget);
+  }, [relocations, annualTarget]);
 
   // Handlers
   const handleSaveProduct = async (
@@ -140,6 +164,47 @@ export default function InventoryDashboard() {
           <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-300 mt-1">
             Real-time stock tracking for CCTV cameras, network devices, and cabling hardware.
           </p>
+        </div>
+      </div>
+
+      {/* Annual Camera Relocation Project Quick Banner */}
+      <div className="p-4 sm:p-5 rounded-3xl bg-zinc-900 text-white dark:bg-zinc-900 border border-zinc-800 shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex items-center gap-3.5">
+          <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+            <Camera className="w-5 h-5 stroke-[2.2]" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-bold text-white">Annual Camera Relocations Project</span>
+              <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                {projectStats.progressPercentage}% Complete
+              </span>
+            </div>
+            <p className="text-xs text-zinc-400 mt-0.5">
+              <strong className="text-emerald-400 font-semibold">{projectStats.totalRelocated}</strong> of {annualTarget} cameras relocated • <strong className="text-amber-400 font-semibold">{projectStats.remaining}</strong> remaining to deploy
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2.5 shrink-0">
+          <Link
+            href="/display"
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold border border-white/20 transition-all hover:scale-105"
+            title="Launch Fullscreen Office TV Wallboard"
+          >
+            <Tv className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
+            <span>TV Wallboard</span>
+          </Link>
+
+          <Link
+            href="/relocations"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white text-zinc-950 hover:bg-zinc-100 text-xs font-semibold shadow-xs transition-all"
+          >
+            <span>View Relocations</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
         </div>
       </div>
 

@@ -7,7 +7,8 @@ import { AlertTriangle, Trash2, X } from "lucide-react";
 interface DeleteConfirmModalProps {
   isOpen: boolean;
   onClose: () => void;
-  item: InventoryItem | null;
+  item?: InventoryItem | null;
+  itemName?: string;
   onConfirm: (itemId: string) => Promise<void>;
 }
 
@@ -15,16 +16,18 @@ export function DeleteConfirmModal({
   isOpen,
   onClose,
   item,
+  itemName,
   onConfirm,
 }: DeleteConfirmModalProps) {
   const [isDeleting, setIsDeleting] = useState(false);
 
-  if (!isOpen || !item) return null;
+  if (!isOpen) return null;
+  const displayName = itemName || item?.itemName || "this item";
 
   const handleDelete = async () => {
     try {
       setIsDeleting(true);
-      await onConfirm(item.id);
+      await onConfirm(item?.id || "");
       onClose();
     } catch (err) {
       console.error(err);
@@ -50,12 +53,12 @@ export function DeleteConfirmModal({
 
         <div className="mt-4">
           <h3 className="text-base font-semibold text-zinc-900 dark:text-zinc-50">
-            Delete Product?
+            Confirm Deletion
           </h3>
           <p className="mt-1 text-xs text-zinc-600 dark:text-zinc-300 leading-relaxed">
             Are you sure you want to delete{" "}
-            <strong className="text-zinc-900 dark:text-zinc-100">{item.itemName}</strong>? This
-            will permanently remove it from current inventory records.
+            <strong className="text-zinc-900 dark:text-zinc-100">{displayName}</strong>? This
+            will permanently remove it from records.
           </p>
         </div>
 

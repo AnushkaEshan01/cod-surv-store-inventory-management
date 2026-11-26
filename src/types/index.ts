@@ -45,3 +45,29 @@ export function getStockStatus(quantity: number, threshold: number): StockStatus
   if (quantity <= threshold) return "low-stock";
   return "in-stock";
 }
+
+export type RelocationStatus = "Completed" | "In Progress" | "Pending";
+
+export interface CameraRelocation {
+  id: string;
+  siteName: string; // e.g. "Sampath Bank - Colombo 03"
+  cameraCount: number; // e.g. 4
+  cameraModel?: string; // e.g. "Hikvision 4MP IP Dome"
+  inventoryItemId?: string; // optional linked inventory item
+  relocationDate: string; // ISO or YYYY-MM-DD
+  technicianName: string; // e.g. "Kasun Perera"
+  status: RelocationStatus;
+  notes?: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface CameraProjectStats {
+  annualTarget: number;
+  totalRelocated: number;
+  remaining: number;
+  progressPercentage: number;
+  inProgressCount: number;
+  pendingCount: number;
+  totalSites: number;
+}

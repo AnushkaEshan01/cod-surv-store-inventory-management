@@ -38,5 +38,17 @@ service cloud.firestore {
       allow create: if isAuthenticated();
       allow update, delete: if false;
     }
+
+    // Camera Relocations Collection (Public Read for Office TV Monitor, Admin Write)
+    match /camera_relocations/{relocId} {
+      allow read: if true;
+      allow create, update, delete: if isAuthenticated();
+    }
+
+    // Camera Project Settings (Public Read for Office TV Monitor, Admin Write)
+    match /project_settings/{settingId} {
+      allow read: if true;
+      allow create, update, delete: if isAuthenticated();
+    }
   }
 }

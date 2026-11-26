@@ -24,8 +24,8 @@ const CATEGORIES: ItemCategory[] = [
 export function ProductModal({ isOpen, onClose, onSave, editItem }: ProductModalProps) {
   const [itemName, setItemName] = useState("");
   const [category, setCategory] = useState<string>("CCTV Cameras");
-  const [quantity, setQuantity] = useState<number>(10);
-  const [lowStockThreshold, setLowStockThreshold] = useState<number>(5);
+  const [quantity, setQuantity] = useState<number | string>(10);
+  const [lowStockThreshold, setLowStockThreshold] = useState<number | string>(5);
   const [unit, setUnit] = useState("pcs");
   const [description, setDescription] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -172,7 +172,7 @@ export function ProductModal({ isOpen, onClose, onSave, editItem }: ProductModal
                 min="0"
                 required
                 value={quantity}
-                onChange={(e) => setQuantity(Math.max(0, parseInt(e.target.value) || 0))}
+                onChange={(e) => setQuantity(e.target.value)}
                 className="w-full px-3.5 py-2.5 rounded-xl text-sm bg-white/80 dark:bg-zinc-900/80 border border-zinc-200/80 dark:border-zinc-700/80 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-100 transition-all"
               />
             </div>
@@ -186,7 +186,7 @@ export function ProductModal({ isOpen, onClose, onSave, editItem }: ProductModal
                 min="1"
                 required
                 value={lowStockThreshold}
-                onChange={(e) => setLowStockThreshold(Math.max(1, parseInt(e.target.value) || 1))}
+                onChange={(e) => setLowStockThreshold(e.target.value)}
                 className="w-full px-3.5 py-2.5 rounded-xl text-sm bg-white/80 dark:bg-zinc-900/80 border border-zinc-200/80 dark:border-zinc-700/80 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-100 transition-all"
               />
               <span className="text-[10px] text-zinc-600 dark:text-zinc-300 mt-1 block">

@@ -24,7 +24,7 @@ export function StockActionModal({
   actionType,
   onConfirm,
 }: StockActionModalProps) {
-  const [amount, setAmount] = useState<number>(1);
+  const [amount, setAmount] = useState<number | string>(1);
   const [notes, setNotes] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -32,24 +32,26 @@ export function StockActionModal({
   if (!isOpen || !item) return null;
 
   const isAdd = actionType === "IN";
-  const projectedQuantity = isAdd ? item.quantity + amount : item.quantity - amount;
+  const numAmount = amount === "" ? 0 : Number(amount) || 0;
+  const projectedQuantity = isAdd ? item.quantity + numAmount : item.quantity - numAmount;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (amount <= 0) {
+    const finalAmount = Number(amount);
+    if (!amount || isNaN(finalAmount) || finalAmount <= 0) {
       setErrorMessage("Please enter a quantity greater than 0.");
       return;
     }
 
-    if (!isAdd && amount > item.quantity) {
-      setErrorMessage(`Cannot deduct ${amount}. Current stock is only ${item.quantity}.`);
+    if (!isAdd && finalAmount > item.quantity) {
+      setErrorMessage(`Cannot deduct ${finalAmount}. Current stock is only ${item.quantity}.`);
       return;
     }
 
     try {
       setIsSubmitting(true);
       setErrorMessage("");
-      const res = await onConfirm(item.id, actionType, amount, notes.trim());
+      const res = await onConfirm(item.id, actionType, finalAmount, notes.trim());
       if (res.success) {
         onClose();
         setAmount(1);
@@ -133,7 +135,7 @@ export function StockActionModal({
               max={isAdd ? undefined : item.quantity}
               required
               value={amount}
-              onChange={(e) => setAmount(Math.max(1, parseInt(e.target.value) || 0))}
+              onChange={(e) => setAmount(e.target.value)}
               className="w-full px-3.5 py-2.5 rounded-xl text-lg font-semibold bg-white/80 dark:bg-zinc-900/80 border border-zinc-200/80 dark:border-zinc-700/80 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-100 transition-all text-center"
             />
           </div>
@@ -146,7 +148,7 @@ export function StockActionModal({
                 key={num}
                 onClick={() => setAmount(num)}
                 className={`px-3 py-1 rounded-lg text-xs font-medium border transition-colors ${
-                  amount === num
+                  Number(amount) === num
                     ? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 border-transparent"
                     : "bg-white/60 dark:bg-zinc-800/60 text-zinc-600 dark:text-zinc-300 border-zinc-200/60 dark:border-zinc-700/60 hover:bg-zinc-100 dark:hover:bg-zinc-700"
                 }`}
@@ -197,7 +199,7 @@ export function StockActionModal({
             </button>
             <button
               type="submit"
-              disabled={isSubmitting || (!isAdd && item.quantity < amount)}
+              disabled={isSubmitting || !amount || (!isAdd && item.quantity < numAmount)}
               className={`flex items-center gap-1.5 px-5 py-2 rounded-xl text-xs font-medium shadow-sm transition-all disabled:opacity-50 ${
                 isAdd
                   ? "bg-emerald-600 hover:bg-emerald-700 text-white"

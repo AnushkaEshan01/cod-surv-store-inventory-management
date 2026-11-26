@@ -64,7 +64,7 @@ export default function RelocationsPage() {
 
   // Target Edit Modal
   const [isEditingTarget, setIsEditingTarget] = useState(false);
-  const [targetInput, setTargetInput] = useState(100);
+  const [targetInput, setTargetInput] = useState<number | string>(100);
 
   // Firestore Rules Permission Alert State
   const [permissionError, setPermissionError] = useState(false);
@@ -283,8 +283,9 @@ service cloud.firestore {
       setAdminModalOpen(true);
       return;
     }
-    if (targetInput > 0) {
-      await updateAnnualTarget(targetInput);
+    const parsedTarget = Number(targetInput);
+    if (!isNaN(parsedTarget) && parsedTarget > 0) {
+      await updateAnnualTarget(parsedTarget);
       setIsEditingTarget(false);
     }
   };
@@ -702,7 +703,7 @@ service cloud.firestore {
                   min={1}
                   max={10000}
                   value={targetInput}
-                  onChange={(e) => setTargetInput(Number(e.target.value))}
+                  onChange={(e) => setTargetInput(e.target.value)}
                   className="w-full px-3.5 py-2 rounded-xl text-sm bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white"
                 />
               </div>

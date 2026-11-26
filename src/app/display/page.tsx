@@ -20,7 +20,6 @@ import {
   Boxes,
   Maximize2,
   Minimize2,
-  Radio,
   Layers,
   ArrowLeft,
   Sparkles,
@@ -361,21 +360,8 @@ export default function DisplayWallboardPage() {
             </div>
           </div>
 
-          {/* Live Status & Clock & Full View & Theme Controls */}
+          {/* Clock & Full View & Theme Controls */}
           <div className="flex items-center gap-3 sm:gap-4">
-            {/* Live Sync Status */}
-            <div
-              className={`hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-semibold ${
-                isDark
-                  ? "bg-emerald-950/40 border-emerald-800/40 text-emerald-400"
-                  : "bg-emerald-50 border-emerald-200 text-emerald-700"
-              }`}
-            >
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-              <Radio className="w-3.5 h-3.5" />
-              <span>REALTIME SYNC</span>
-            </div>
-
             {/* Large Digital Clock */}
             <div className="text-right">
               <div

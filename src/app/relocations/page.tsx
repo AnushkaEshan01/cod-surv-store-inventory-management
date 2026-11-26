@@ -12,6 +12,7 @@ import {
   updateCameraRelocation,
   deleteCameraRelocation,
   updateAnnualTarget,
+  clearMockCameraRelocations,
 } from "@/lib/relocation-service";
 import { subscribeToInventory, adjustStock } from "@/lib/inventory-service";
 import { RelocationModal } from "@/components/RelocationModal";
@@ -29,6 +30,7 @@ import {
   CheckCircle2,
   Clock,
   AlertCircle,
+  AlertTriangle,
   TrendingUp,
   Edit2,
   Trash2,
@@ -38,6 +40,8 @@ import {
   Layers,
   ArrowUpRight,
   ExternalLink,
+  Copy,
+  Check,
 } from "lucide-react";
 
 export default function RelocationsPage() {
@@ -62,12 +66,78 @@ export default function RelocationsPage() {
   const [isEditingTarget, setIsEditingTarget] = useState(false);
   const [targetInput, setTargetInput] = useState(100);
 
+  // Firestore Rules Permission Alert State
+  const [permissionError, setPermissionError] = useState(false);
+  const [rulesCopied, setRulesCopied] = useState(false);
+
+  const FIRESTORE_RULES_SNIPPET = `rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Admin Users Collection
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
+    }
+
+    // Inventory Items Collection
+    match /inventory_items/{itemId} {
+      allow read: if true;
+      allow create, update, delete: if isAuthenticated();
+    }
+
+    // Transaction Audit Logs Collection
+    match /transaction_logs/{logId} {
+      allow read: if true;
+      allow create: if isAuthenticated();
+      allow update, delete: if false;
+    }
+
+    // Camera Relocations Collection (Public Read, Admin Write)
+    match /camera_relocations/{relocId} {
+      allow read: if true;
+      allow create, update, delete: if isAuthenticated();
+    }
+
+    // Camera Project Settings (Public Read, Admin Write)
+    match /project_settings/{settingId} {
+      allow read: if true;
+      allow create, update, delete: if isAuthenticated();
+    }
+  }
+}`;
+
+  const handleCopyRules = () => {
+    navigator.clipboard.writeText(FIRESTORE_RULES_SNIPPET);
+    setRulesCopied(true);
+    setTimeout(() => setRulesCopied(false), 3000);
+  };
+
   // Real-time subscriptions
   useEffect(() => {
-    const unsubRelocs = subscribeToCameraRelocations((items) => {
-      setRelocations(items);
-      setLoading(false);
-    });
+    // Purge any legacy sample mock data from localStorage
+    clearMockCameraRelocations();
+
+    const unsubRelocs = subscribeToCameraRelocations(
+      (items) => {
+        setRelocations(items);
+        setLoading(false);
+      },
+      (err) => {
+        setLoading(false);
+        if (
+          err.message?.toLowerCase().includes("permission") ||
+          err.message?.toLowerCase().includes("insufficient")
+        ) {
+          setPermissionError(true);
+        }
+      }
+    );
 
     const unsubTarget = subscribeToAnnualTarget((target) => {
       setAnnualTarget(target);
@@ -153,41 +223,49 @@ export default function RelocationsPage() {
     notes?: string;
     deductStock?: boolean;
   }) => {
-    if (editingItem) {
-      await updateCameraRelocation(editingItem.id, {
-        siteName: data.siteName,
-        cameraCount: data.cameraCount,
-        cameraModel: data.cameraModel,
-        inventoryItemId: data.inventoryItemId,
-        relocationDate: data.relocationDate,
-        technicianName: data.technicianName || "",
-        status: data.status,
-        isQuotaProject: data.isQuotaProject,
-        notes: data.notes,
-      });
-    } else {
-      await addCameraRelocation({
-        siteName: data.siteName,
-        cameraCount: data.cameraCount,
-        cameraModel: data.cameraModel,
-        inventoryItemId: data.inventoryItemId,
-        relocationDate: data.relocationDate,
-        technicianName: data.technicianName || "",
-        status: data.status,
-        isQuotaProject: data.isQuotaProject,
-        notes: data.notes,
-      });
+    try {
+      if (editingItem) {
+        await updateCameraRelocation(editingItem.id, {
+          siteName: data.siteName,
+          cameraCount: data.cameraCount,
+          cameraModel: data.cameraModel,
+          inventoryItemId: data.inventoryItemId,
+          relocationDate: data.relocationDate,
+          technicianName: data.technicianName || "",
+          status: data.status,
+          isQuotaProject: data.isQuotaProject,
+          notes: data.notes,
+        });
+      } else {
+        await addCameraRelocation({
+          siteName: data.siteName,
+          cameraCount: data.cameraCount,
+          cameraModel: data.cameraModel,
+          inventoryItemId: data.inventoryItemId,
+          relocationDate: data.relocationDate,
+          technicianName: data.technicianName || "",
+          status: data.status,
+          isQuotaProject: data.isQuotaProject,
+          notes: data.notes,
+        });
 
-      // Deduct from stock if requested
-      if (data.deductStock && data.inventoryItemId && user) {
-        await adjustStock(
-          data.inventoryItemId,
-          "OUT",
-          data.cameraCount,
-          user.email || "admin@codsurv.com",
-          `Relocated ${data.cameraCount}x to ${data.siteName}`
-        );
+        // Deduct from stock if requested
+        if (data.deductStock && data.inventoryItemId && user) {
+          await adjustStock(
+            data.inventoryItemId,
+            "OUT",
+            data.cameraCount,
+            user.email || "admin@codsurv.com",
+            `Relocated ${data.cameraCount}x to ${data.siteName}`
+          );
+        }
       }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "";
+      if (msg.toLowerCase().includes("permission") || msg.toLowerCase().includes("insufficient")) {
+        setPermissionError(true);
+      }
+      throw err;
     }
   };
 
@@ -255,6 +333,41 @@ export default function RelocationsPage() {
         {/* Decorative background blur ring */}
         <div className="absolute -right-16 -top-16 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
       </div>
+
+      {/* Firebase Firestore Rules Permission Alert Banner */}
+      {permissionError && (
+        <div className="p-5 rounded-3xl bg-amber-500/10 border border-amber-500/30 text-amber-950 dark:text-amber-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-fade-in shadow-xs">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+            <div className="space-y-0.5">
+              <h4 className="text-sm font-bold text-amber-950 dark:text-amber-100">
+                Firebase Firestore Security Rules Update Required
+              </h4>
+              <p className="text-xs text-amber-800 dark:text-amber-300">
+                Camera relocations Firestore permission denied. Rules වලට <code className="px-1 py-0.5 rounded bg-amber-500/20 font-mono text-[11px]">camera_relocations</code> සහ <code className="px-1 py-0.5 rounded bg-amber-500/20 font-mono text-[11px]">project_settings</code> එකතු කර Firebase Console හි Publish කරන්න.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={handleCopyRules}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-amber-600 hover:bg-amber-700 text-white shadow-xs transition-all"
+            >
+              {rulesCopied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+              <span>{rulesCopied ? "Copied Rules!" : "Copy Rules"}</span>
+            </button>
+            <a
+              href="https://console.firebase.google.com/project/cod-serv-store-invetory/firestore/rules"
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center gap-1 px-3 py-2 rounded-xl text-xs font-semibold bg-zinc-900/10 dark:bg-white/10 hover:bg-zinc-900/20 dark:hover:bg-white/20 transition-all text-amber-950 dark:text-amber-200"
+            >
+              <span>Firebase Console</span>
+              <ExternalLink className="w-3.5 h-3.5" />
+            </a>
+          </div>
+        </div>
+      )}
 
       {/* KPI Cards Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">

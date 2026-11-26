@@ -20,16 +20,18 @@ const LOCAL_STORAGE_LOGS_KEY = "cod_surv_transaction_logs";
 
 // Helper for local mock storage
 function getLocalItems(): InventoryItem[] {
-  if (typeof window === "undefined") return INITIAL_INVENTORY_ITEMS;
+  if (typeof window === "undefined") return [];
   const stored = localStorage.getItem(LOCAL_STORAGE_ITEMS_KEY);
   if (!stored) {
-    localStorage.setItem(LOCAL_STORAGE_ITEMS_KEY, JSON.stringify(INITIAL_INVENTORY_ITEMS));
-    return INITIAL_INVENTORY_ITEMS;
+    return [];
   }
   try {
-    return JSON.parse(stored);
+    const parsed = JSON.parse(stored);
+    if (!Array.isArray(parsed)) return [];
+    // Clean out legacy sample dummy items (item-1..10)
+    return parsed.filter((it: InventoryItem) => !/^item-[1-9]$|^item-10$/.test(it.id));
   } catch {
-    return INITIAL_INVENTORY_ITEMS;
+    return [];
   }
 }
 
@@ -40,16 +42,18 @@ function saveLocalItems(items: InventoryItem[]) {
 }
 
 function getLocalLogs(): TransactionLog[] {
-  if (typeof window === "undefined") return INITIAL_TRANSACTION_LOGS;
+  if (typeof window === "undefined") return [];
   const stored = localStorage.getItem(LOCAL_STORAGE_LOGS_KEY);
   if (!stored) {
-    localStorage.setItem(LOCAL_STORAGE_LOGS_KEY, JSON.stringify(INITIAL_TRANSACTION_LOGS));
-    return INITIAL_TRANSACTION_LOGS;
+    return [];
   }
   try {
-    return JSON.parse(stored);
+    const parsed = JSON.parse(stored);
+    if (!Array.isArray(parsed)) return [];
+    // Clean out legacy sample dummy logs (log-1..5)
+    return parsed.filter((l: TransactionLog) => !/^log-[1-5]$/.test(l.id));
   } catch {
-    return INITIAL_TRANSACTION_LOGS;
+    return [];
   }
 }
 

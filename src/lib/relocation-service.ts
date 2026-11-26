@@ -15,141 +15,36 @@ import { CameraRelocation, CameraProjectStats } from "@/types";
 
 export const DEFAULT_ANNUAL_TARGET = 100;
 
-export const INITIAL_CAMERA_RELOCATIONS: CameraRelocation[] = [
-  {
-    id: "reloc-cod-1",
-    siteName: "COD - Central Operations & Logistics Hub (Colombo)",
-    cameraCount: 16,
-    cameraModel: "Hikvision 4MP IP Dome Camera",
-    inventoryItemId: "item-1",
-    relocationDate: new Date(Date.now() - 3600000 * 24 * 5).toISOString().split("T")[0],
-    technicianName: "Kasun Perera",
-    status: "Completed",
-    isQuotaProject: true,
-    notes: "Main warehouse loading dock and sorting facility relocation completed.",
-    createdAt: new Date(Date.now() - 3600000 * 24 * 5).toISOString(),
-  },
-  {
-    id: "reloc-cod-2",
-    siteName: "COD - Kandy Regional Distribution Facility",
-    cameraCount: 12,
-    cameraModel: "Dahua 2MP Bullet Camera",
-    inventoryItemId: "item-2",
-    relocationDate: new Date(Date.now() - 3600000 * 24 * 12).toISOString().split("T")[0],
-    technicianName: "Nuwan Silva",
-    status: "Completed",
-    isQuotaProject: true,
-    notes: "Perimeter fence and dispatch bay camera relocation.",
-    createdAt: new Date(Date.now() - 3600000 * 24 * 12).toISOString(),
-  },
-  {
-    id: "reloc-cod-3",
-    siteName: "COD - Galle Logistics Center",
-    cameraCount: 10,
-    cameraModel: "Hikvision 4MP IP Dome Camera",
-    inventoryItemId: "item-1",
-    relocationDate: new Date(Date.now() - 3600000 * 24 * 20).toISOString().split("T")[0],
-    technicianName: "Pradeep Kumara",
-    status: "Completed",
-    isQuotaProject: true,
-    notes: "Internal storage racks and security perimeter repositioning.",
-    createdAt: new Date(Date.now() - 3600000 * 24 * 20).toISOString(),
-  },
-  {
-    id: "reloc-cod-4",
-    siteName: "COD - Negombo Express Facility",
-    cameraCount: 8,
-    cameraModel: "Hikvision 4MP IP Dome Camera",
-    inventoryItemId: "item-1",
-    relocationDate: new Date(Date.now() - 3600000 * 24 * 28).toISOString().split("T")[0],
-    technicianName: "Kasun Perera",
-    status: "Completed",
-    isQuotaProject: true,
-    notes: "Security gate and express counter coverage upgrade.",
-    createdAt: new Date(Date.now() - 3600000 * 24 * 28).toISOString(),
-  },
-  {
-    id: "reloc-cod-5",
-    siteName: "COD - Kurunegala Regional Depot",
-    cameraCount: 8,
-    cameraModel: "Dahua 2MP Bullet Camera",
-    inventoryItemId: "item-2",
-    relocationDate: new Date(Date.now() - 3600000 * 24 * 35).toISOString().split("T")[0],
-    technicianName: "Nuwan Silva",
-    status: "Completed",
-    isQuotaProject: true,
-    notes: "Heavy vehicle parking and loading bay camera relocation.",
-    createdAt: new Date(Date.now() - 3600000 * 24 * 35).toISOString(),
-  },
-  {
-    id: "reloc-cod-6",
-    siteName: "COD - Gampaha Sorting Center",
-    cameraCount: 8,
-    cameraModel: "Hikvision 4MP IP Dome Camera",
-    inventoryItemId: "item-1",
-    relocationDate: new Date(Date.now() - 3600000 * 24 * 42).toISOString().split("T")[0],
-    technicianName: "Pradeep Kumara",
-    status: "Completed",
-    isQuotaProject: true,
-    notes: "Parcel sorting lines and conveyor belt surveillance relocation.",
-    createdAt: new Date(Date.now() - 3600000 * 24 * 42).toISOString(),
-  },
-  {
-    id: "reloc-cod-7",
-    siteName: "COD - Jaffna Logistics Center",
-    cameraCount: 6,
-    cameraModel: "Hikvision 4MP IP Dome Camera",
-    inventoryItemId: "item-1",
-    relocationDate: new Date(Date.now() + 3600000 * 24 * 3).toISOString().split("T")[0],
-    technicianName: "Kasun Perera",
-    status: "In Progress",
-    isQuotaProject: true,
-    notes: "Northern provincial hub setup underway.",
-    createdAt: new Date().toISOString(),
-  },
-  // Non-Quota Relocations (Outside the 100 Annual Quota)
-  {
-    id: "reloc-extra-1",
-    siteName: "Keells Super - Nawala Retail Store",
-    cameraCount: 10,
-    cameraModel: "Hikvision 4MP IP Dome Camera",
-    inventoryItemId: "item-1",
-    relocationDate: new Date(Date.now() - 3600000 * 24 * 15).toISOString().split("T")[0],
-    technicianName: "Nuwan Silva",
-    status: "Completed",
-    isQuotaProject: false,
-    notes: "Ad-hoc non-contract relocation for retail store aisles.",
-    createdAt: new Date(Date.now() - 3600000 * 24 * 15).toISOString(),
-  },
-  {
-    id: "reloc-extra-2",
-    siteName: "Singer Mega Showroom - Kandy",
-    cameraCount: 8,
-    cameraModel: "Dahua 2MP Bullet Camera",
-    inventoryItemId: "item-2",
-    relocationDate: new Date(Date.now() - 3600000 * 24 * 22).toISOString().split("T")[0],
-    technicianName: "Pradeep Kumara",
-    status: "Completed",
-    isQuotaProject: false,
-    notes: "Non-quota external parking and storage bay camera installation.",
-    createdAt: new Date(Date.now() - 3600000 * 24 * 22).toISOString(),
-  },
-];
+export const INITIAL_CAMERA_RELOCATIONS: CameraRelocation[] = [];
 
-const LOCAL_STORAGE_RELOCS_KEY = "cod_surv_camera_relocations_v4";
-const LOCAL_STORAGE_TARGET_KEY = "cod_surv_annual_camera_target_v4";
+const LOCAL_STORAGE_RELOCS_KEY = "cod_surv_camera_relocations_v5";
+const LOCAL_STORAGE_TARGET_KEY = "cod_surv_annual_camera_target_v5";
+
+export function clearMockCameraRelocations() {
+  if (typeof window !== "undefined") {
+    localStorage.removeItem(LOCAL_STORAGE_RELOCS_KEY);
+    localStorage.removeItem("cod_surv_camera_relocations_v4");
+    window.dispatchEvent(new CustomEvent("relocations_updated", { detail: [] }));
+  }
+}
 
 function getLocalRelocations(): CameraRelocation[] {
-  if (typeof window === "undefined") return INITIAL_CAMERA_RELOCATIONS;
+  if (typeof window === "undefined") return [];
   const stored = localStorage.getItem(LOCAL_STORAGE_RELOCS_KEY);
   if (!stored) {
-    localStorage.setItem(LOCAL_STORAGE_RELOCS_KEY, JSON.stringify(INITIAL_CAMERA_RELOCATIONS));
-    return INITIAL_CAMERA_RELOCATIONS;
+    return [];
   }
   try {
-    return JSON.parse(stored);
+    const parsed = JSON.parse(stored);
+    if (!Array.isArray(parsed)) return [];
+    // Filter out any lingering mock dummy items
+    const cleaned = parsed.filter(
+      (r: CameraRelocation) =>
+        !r.id.startsWith("reloc-cod-") && !r.id.startsWith("reloc-extra-")
+    );
+    return cleaned;
   } catch {
-    return INITIAL_CAMERA_RELOCATIONS;
+    return [];
   }
 }
 
